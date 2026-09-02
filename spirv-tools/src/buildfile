@@ -1,9 +1,62 @@
-libs =
-#import libs += libhello%lib{hello}
+import libs = libspirv-tools%lib{SPIRV-Tools}
+import libs_opt = libspirv-tools%lib{SPIRV-Tools-opt}
+import libs_link = libspirv-tools%lib{SPIRV-Tools-link}
+import libs_lint = libspirv-tools%lib{SPIRV-Tools-lint}
+import libs_reduce = libspirv-tools%lib{SPIRV-Tools-reduce}
+import libs_diff = libspirv-tools%lib{SPIRV-Tools-diff}
+import hdrs = libspirv-headers%lib{spirv-headers}
 
-exe{spirv-tools}: {hxx ixx txx cxx}{**} $libs tools/testscript
+define inc: hxx
+inc{*}: extension = inc
+
+# Shared CLI helpers. Not installed.
+#
+libue{common}: tools/{h}{**} tools/cxx{io} tools/util/{h cxx}{flags cli_consumer} $libs $hdrs
+{
+  install = false
+}
+
+# Private headers included as "source/..." and "include/spirv-tools/..."
+# plus generated grammar tables. Adhoc so dist ships them without compiling
+# them in this package.
+#
+libue{common}: source/{h}{** -fuzz/** -wasm/**}: include = adhoc
+libue{common}: include/spirv-tools/{hxx h}{**}: include = adhoc
+libue{common}: gen/{h}{**}: include = adhoc
+libue{common}: gen/inc{**}: include = adhoc
+
+exe{spirv-as}:      tools/as/cxx{as}                           libue{common} $libs $hdrs
+exe{spirv-dis}:     tools/dis/cxx{dis}                         libue{common} $libs $hdrs
+exe{spirv-val}:     tools/val/cxx{val}                         libue{common} $libs $hdrs
+exe{spirv-opt}:     tools/opt/cxx{opt}                         libue{common} $libs_opt $libs $hdrs
+exe{spirv-link}:    tools/link/cxx{linker}                     libue{common} $libs_link $libs $hdrs
+exe{spirv-lint}:    tools/lint/cxx{lint}                       libue{common} $libs_lint $libs_opt $libs $hdrs
+exe{spirv-reduce}:  tools/reduce/cxx{reduce}                   libue{common} $libs_reduce $libs $hdrs
+exe{spirv-cfg}:     tools/cfg/cxx{cfg} tools/cfg/{h cxx}{bin_to_dot} libue{common} $libs $hdrs
+exe{spirv-diff}:    tools/diff/cxx{diff}                       libue{common} $libs_diff $libs_opt $libs $hdrs
+exe{spirv-objdump}: tools/objdump/cxx{objdump extract_source}  libue{common} $libs $hdrs
+
+# Version smoke test on the assembler.
+#
+exe{spirv-as}: testscript
 
 out_pfx = [dir_path] $out_root/src/
 src_pfx = [dir_path] $src_root/src/
 
-cxx.poptions =+ "-I$out_pfx" "-I$src_pfx"
+# -I src/ makes #include "tools/..." and the private #include "source/..."
+# (via the source/ symlink) work, matching upstream's repository-root includes.
+#
+cxx.poptions =+ "-I$out_pfx" "-I$src_pfx" \
+                "-I$out_pfx/gen" "-I$src_pfx/gen"
+
+if ($cxx.class != 'msvc')
+  cxx.coptions += -fno-exceptions -fno-rtti
+
+./: exe{spirv-as spirv-dis spirv-val spirv-opt spirv-link spirv-lint \
+        spirv-reduce spirv-cfg spirv-diff spirv-objdump}
+
+# Don't install private headers.
+#
+{hxx ixx txx h}{*}: install = false
+tools/{hxx ixx txx h}{*}: install = false
+source/{hxx ixx txx h}{*}: install = false

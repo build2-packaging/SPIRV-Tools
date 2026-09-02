@@ -1,5 +1,25 @@
+spirv-as
+spirv-cfg
+spirv-diff
+spirv-dis
+spirv-link
+spirv-lint
+spirv-objdump
+spirv-opt
+spirv-reduce
+spirv-val
 spirv-tools
 
-# Testscript output directory (can be symlink).
+# Testscript output directories (can be symlinks).
 #
+test-spirv-as
+test-spirv-cfg
+test-spirv-diff
+test-spirv-dis
+test-spirv-link
+test-spirv-lint
+test-spirv-objdump
+test-spirv-opt
+test-spirv-reduce
+test-spirv-val
 test-spirv-tools
