@@ -1,0 +1,5 @@
+spirv-tools
+
+# Testscript output directory (can be symlink).
+#
+test-spirv-tools
