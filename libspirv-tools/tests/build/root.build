@@ -6,6 +6,7 @@ hxx{*}: extension = hpp
 ixx{*}: extension = ipp
 txx{*}: extension = tpp
 cxx{*}: extension = cpp
+h{*}: extension = h
 
 # Every exe{} in this subproject is by default a test.
 #

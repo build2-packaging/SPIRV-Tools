@@ -1,15 +1,17 @@
 # Uncomment to suppress warnings coming from external libraries.
 #
-#cxx.internal.scope = current
+cxx.internal.scope = current
 
 cxx.std = latest
 
 using cxx
+using in
 
 hxx{*}: extension = hpp
 ixx{*}: extension = ipp
 txx{*}: extension = tpp
 cxx{*}: extension = cpp
+h{*}: extension = h
 
 # The test target for cross-testing (running tests under Wine, etc).
 #

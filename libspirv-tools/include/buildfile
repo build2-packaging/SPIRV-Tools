@@ -1,10 +1,13 @@
-pub_hdrs = {hxx ixx txx}{**}
+pub_hdrs = {hxx ixx txx h}{**}
 
 ./: $pub_hdrs
 
-# Install recreating subdirectories.
+# Install recreating subdirectories. Upstream CMake lists libspirv.h,
+# libspirv.hpp, optimizer.hpp, and linker.hpp. linter.hpp lives in the
+# same public include/spirv-tools/ directory and is the API of
+# lib{SPIRV-Tools-lint}, so it is installed as well.
 #
-{hxx ixx txx}{*}:
+{hxx ixx txx h}{*}:
 {
   install         = include/
   install.subdirs = true
