@@ -1,9 +1,9 @@
-# spirv-tools - SPIR-V Tools
+# spirv-tools - SPIR-V assembler, disassembler, validator, and optimizer command line tools
 
-This is a `build2` package for the [`<UPSTREAM-NAME>`](https://<UPSTREAM-URL>)
-executable. It is a <SUMMARY-OF-FUNCTIONALITY>.
-
-Note that the `spirv-tools` executable in this package provides `build2` metadata.
+This is a `build2` package for the [`SPIRV-Tools`](https://github.com/KhronosGroup/SPIRV-Tools)
+command line tools. It provides the standalone assembler, disassembler,
+validator, optimizer, linker, linter, reducer, CFG dumper, diff, and objdump
+utilities.
 
 
 ## Usage
@@ -13,13 +13,13 @@ To start using `spirv-tools` in your project, add the following build-time
 appropriate:
 
 ```
-depends: * spirv-tools ^<VERSION>
+depends: * spirv-tools ^1.4.357
 ```
 
 Then import the executable in your `buildfile`:
 
 ```
-import! [metadata] <TARGET> = spirv-tools%exe{<TARGET>}
+import spirv_as = spirv-tools%exe{spirv-as}
 ```
 
 
@@ -28,18 +28,22 @@ import! [metadata] <TARGET> = spirv-tools%exe{<TARGET>}
 This package provides the following importable targets:
 
 ```
-exe{<TARGET>}
+exe{spirv-as}
+exe{spirv-dis}
+exe{spirv-val}
+exe{spirv-opt}
+exe{spirv-link}
+exe{spirv-lint}
+exe{spirv-reduce}
+exe{spirv-cfg}
+exe{spirv-diff}
+exe{spirv-objdump}
 ```
 
-<DESCRIPTION-OF-IMPORTABLE-TARGETS>
+These match upstream's tool names. `spirv-fuzz` is not built (it needs
+protobuf and is optional upstream).
 
 
 ## Configuration variables
 
-This package provides the following configuration variables:
-
-```
-[bool] config.spirv_tools.<VARIABLE> ?= false
-```
-
-<DESCRIPTION-OF-CONFIG-VARIABLES>
+This package has no configuration variables.
