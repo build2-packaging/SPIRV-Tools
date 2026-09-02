@@ -99,6 +99,21 @@ if ($cxx.target.system == 'linux' || $cxx.target.system == 'android')
 if ($cxx.class != 'msvc')
   cxx.coptions += -fno-exceptions -fno-rtti
 
+if ($cxx.id == 'gcc')
+{
+  # GCC -O2/-O3 false positive in GroupIdsAndMatchByMappedId.
+  #
+  obj{source/diff/diff}: cxx.coptions += -Wno-maybe-uninitialized
+}
+
+if ($cxx.class == 'msvc')
+{
+  # std::unique_ptr member of a dllexport class (libspirv.hpp). Upstream
+  # CMake passes /wd4251.
+  #
+  cxx.coptions += /wd4251
+}
+
 # Shared core library: public API only (upstream SPIRV_TOOLS_SHAREDLIB).
 #
 libs{SPIRV-Tools}: cxx.poptions += -DSPIRV_TOOLS_IMPLEMENTATION -DSPIRV_TOOLS_SHAREDLIB
