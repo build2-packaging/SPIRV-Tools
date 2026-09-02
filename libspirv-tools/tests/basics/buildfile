@@ -1,3 +1,4 @@
-import libs = libspirv-tools%lib{spirv-tools}
+import libs = libspirv-tools%lib{SPIRV-Tools}
+import libs += libspirv-tools%lib{SPIRV-Tools-opt}
 
 exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}

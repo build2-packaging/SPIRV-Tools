@@ -1,34 +1,24 @@
-#include <sstream>
-#include <stdexcept>
-
-#include <spirv-tools/spirv-tools.hpp>
+#include <spirv-tools/libspirv.h>
+#include <spirv-tools/optimizer.hpp>
 
 #undef NDEBUG
 #include <cassert>
+#include <cstring>
 
 int main ()
 {
-  using namespace std;
-  using namespace spirv_tools;
-
-  // Basics.
+  // Non-inline C API: software version and context create/destroy.
   //
-  {
-    ostringstream o;
-    say_hello (o, "World");
-    assert (o.str () == "Hello, World!\n");
-  }
+  const char* v (spvSoftwareVersionString ());
+  assert (v != nullptr);
+  assert (std::strlen (v) != 0);
 
-  // Empty name.
+  spv_context ctx (spvContextCreate (SPV_ENV_UNIVERSAL_1_6));
+  assert (ctx != nullptr);
+  spvContextDestroy (ctx);
+
+  // Non-inline C++ optimizer API.
   //
-  try
-  {
-    ostringstream o;
-    say_hello (o, "");
-    assert (false);
-  }
-  catch (const invalid_argument& e)
-  {
-    assert (e.what () == string ("empty name"));
-  }
+  spvtools::Optimizer opt (SPV_ENV_UNIVERSAL_1_6);
+  opt.RegisterPerformancePasses ();
 }
