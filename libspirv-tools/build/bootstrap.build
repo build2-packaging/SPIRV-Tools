@@ -1,0 +1,7 @@
+project = libspirv-tools
+
+using version
+using config
+using test
+using install
+using dist
