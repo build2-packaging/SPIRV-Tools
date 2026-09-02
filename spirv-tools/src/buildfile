@@ -1,9 +1,13 @@
-import libs = libspirv-tools%lib{SPIRV-Tools}
-import libs_opt = libspirv-tools%lib{SPIRV-Tools-opt}
-import libs_link = libspirv-tools%lib{SPIRV-Tools-link}
-import libs_lint = libspirv-tools%lib{SPIRV-Tools-lint}
-import libs_reduce = libspirv-tools%lib{SPIRV-Tools-reduce}
-import libs_diff = libspirv-tools%lib{SPIRV-Tools-diff}
+# Tools include private core headers. Upstream links them against
+# SPIRV-Tools-static (SPIRV_TOOLS_FULL_VISIBILITY), not the hidden-visibility
+# shared core.
+#
+import libs = libspirv-tools%liba{SPIRV-Tools}
+import libs_opt = libspirv-tools%liba{SPIRV-Tools-opt}
+import libs_link = libspirv-tools%liba{SPIRV-Tools-link}
+import libs_lint = libspirv-tools%liba{SPIRV-Tools-lint}
+import libs_reduce = libspirv-tools%liba{SPIRV-Tools-reduce}
+import libs_diff = libspirv-tools%liba{SPIRV-Tools-diff}
 import hdrs = libspirv-headers%lib{spirv-headers}
 
 define inc: hxx
@@ -48,6 +52,9 @@ src_pfx = [dir_path] $src_root/src/
 #
 cxx.poptions =+ "-I$out_pfx" "-I$src_pfx" \
                 "-I$out_pfx/gen" "-I$src_pfx/gen"
+
+if ($cxx.target.class == 'windows')
+  cxx.poptions += -DSPIRV_WINDOWS -D_CRT_SECURE_NO_WARNINGS
 
 if ($cxx.class != 'msvc')
   cxx.coptions += -fno-exceptions -fno-rtti
