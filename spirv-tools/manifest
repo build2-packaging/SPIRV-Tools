@@ -1,16 +1,23 @@
 : 1
 name: spirv-tools
-version: 0.1.0-a.0.z
+version: 1.4.357-a.0.z
+upstream-version: vulkan-sdk-1.4.357.0
 language: c++
-project: build2-SPIRV-Tools
-summary: SPIR-V Tools
-license: other: proprietary ; Not free/open source.
+project: spirv-tools
+summary: SPIR-V assembler, disassembler, validator, and optimizer command line tools
+topics: graphics, spir-v, vulkan, shader
+license: Apache-2.0
 description-file: README.md
 package-description-file: PACKAGE-README.md
 changes-file: CHANGES
-url: https://example.org/upstream
-email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-SPIRV-Tools
+url: https://github.com/KhronosGroup/SPIRV-Tools
+doc-url: https://github.com/KhronosGroup/SPIRV-Tools
+src-url: https://github.com/KhronosGroup/SPIRV-Tools
+package-url: https://github.com/build2-packaging/SPIRV-Tools
 package-email: packaging@build2.org ; Mailing list.
+requires: c++17
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
+depends: libspirv-tools == $
+depends: libspirv-headers ^ 1.4.357
+build-exclude: *-msvc_14** ; Visual Studio 2015 does not provide C++17 headers.
