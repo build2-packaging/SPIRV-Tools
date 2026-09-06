@@ -1,0 +1,8 @@
+: 1
+name: libspirv-tools
+version: 1.4.357
+upstream-version: vulkan-sdk-1.4.357.0
+language: c++
+project: spirv-tools
+summary: SPIR-V assembler, disassembler, validator, and optimizer C++ library
+license: Apache-2.0, MIT; MIT: gen/DebugInfo.h, gen/OpenCLDebugInfo100.h.
