@@ -106,6 +106,15 @@ if ($cxx.id == 'gcc')
   obj{source/diff/diff}: cxx.coptions += -Wno-maybe-uninitialized
 }
 
+if ($cxx.class == 'gcc')
+{
+  # Upstream aggregate-initializes several structs (text.cpp,
+  # text_handler.cpp, binary.cpp, opt/set_spec_constant_default_value_pass.cpp)
+  # without listing a trailing member. Harmless, fires under -Wextra.
+  #
+  cxx.coptions += -Wno-missing-field-initializers
+}
+
 if ($cxx.class == 'msvc')
 {
   # std::unique_ptr member of a dllexport class (libspirv.hpp). Upstream
