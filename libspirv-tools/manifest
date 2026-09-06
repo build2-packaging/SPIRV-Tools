@@ -1,6 +1,6 @@
 : 1
 name: libspirv-tools
-version: 1.4.357-a.0.z
+version: 1.4.357
 upstream-version: vulkan-sdk-1.4.357.0
 language: c++
 project: spirv-tools
