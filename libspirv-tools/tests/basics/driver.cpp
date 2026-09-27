@@ -1,9 +1,13 @@
 #include <spirv-tools/libspirv.h>
 #include <spirv-tools/optimizer.hpp>
+#include <spirv-tools/linker.hpp>
+#include <spirv-tools/linter.hpp>
 
 #undef NDEBUG
 #include <cassert>
 #include <cstring>
+#include <cstdint>
+#include <vector>
 
 int main ()
 {
@@ -21,4 +25,15 @@ int main ()
   //
   spvtools::Optimizer opt (SPV_ENV_UNIVERSAL_1_6);
   opt.RegisterPerformancePasses ();
+
+  // Non-inline C++ linker API: linking no modules fails.
+  //
+  spvtools::Context lctx (SPV_ENV_UNIVERSAL_1_6);
+  std::vector<std::vector<std::uint32_t>> bins;
+  std::vector<std::uint32_t> linked;
+  assert (spvtools::Link (lctx, bins, &linked) != SPV_SUCCESS);
+
+  // Non-inline C++ linter API.
+  //
+  spvtools::Linter lint (SPV_ENV_UNIVERSAL_1_6);
 }

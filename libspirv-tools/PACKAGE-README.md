@@ -20,7 +20,7 @@ Then import the library target(s) you need in your `buildfile`:
 
 ```
 import libs = libspirv-tools%lib{SPIRV-Tools}
-import libs += libspirv-tools%liba{SPIRV-Tools-opt}
+import libs += libspirv-tools%lib{SPIRV-Tools-opt}
 ```
 
 
@@ -30,21 +30,23 @@ This package provides the following importable targets:
 
 ```
 lib{SPIRV-Tools}
-liba{SPIRV-Tools-opt}
-liba{SPIRV-Tools-link}
-liba{SPIRV-Tools-lint}
-liba{SPIRV-Tools-reduce}
-liba{SPIRV-Tools-diff}
+lib{SPIRV-Tools-opt}
+lib{SPIRV-Tools-link}
+lib{SPIRV-Tools-lint}
+lib{SPIRV-Tools-reduce}
+lib{SPIRV-Tools-diff}
 ```
 
-`lib{SPIRV-Tools}` is the core assembler, disassembler, and validator
-(static and shared). The extra libraries are static only, matching
-upstream: they use non-public core symbols, so they link
-`SPIRV-Tools-static` (`SPIRV_TOOLS_FULL_VISIBILITY`) and are built as
-`STATIC` (`SPIRV_TOOLS_LIBRARY_TYPE`). `liba{SPIRV-Tools-opt}` is the
-optimizer. The remaining targets are the linker, linter, reducer, and
-diff libraries. Each depends on `liba{SPIRV-Tools-opt}`. Target names
-match upstream's CMake libraries.
+`lib{SPIRV-Tools}` is the core assembler, disassembler, and validator.
+`lib{SPIRV-Tools-opt}` is the optimizer. The remaining targets are the
+linker, linter, reducer, and diff libraries, each built on the optimizer.
+Target names match upstream's CMake libraries.
+
+The extra libraries use non-public core (and optimizer) symbols. Their
+static variants link the static core (and optimizer) library, as upstream
+does (`SPIRV_TOOLS_FULL_VISIBILITY`). Since the shared core only provides
+the public API (upstream `SPIRV-Tools-shared`), their shared variants
+contain their own copy of the core (and optimizer) code.
 
 Typical includes:
 

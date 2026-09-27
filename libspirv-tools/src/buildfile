@@ -49,28 +49,38 @@ libul{opt}: source/opt/{h cxx}{** -pch_source_opt} $impl_libs $intf_libs
 
 lib{SPIRV-Tools}: $pub/{$pub_hdrs} libul{core} $impl_libs $intf_libs
 
-# Opt/link/lint/reduce/diff and the CLI tools use non-public core symbols.
-# Upstream links those targets against SPIRV-Tools-static (see
-# SPIRV_TOOLS_FULL_VISIBILITY) and builds them as STATIC
-# (SPIRV_TOOLS_LIBRARY_TYPE). The shared core only exports the public API.
+# Opt/link/lint/reduce/diff and the CLI tools use non-public core symbols
+# (and link/lint/reduce/diff non-public optimizer symbols). Upstream links
+# those targets against SPIRV-Tools-static (see SPIRV_TOOLS_FULL_VISIBILITY)
+# and builds them as STATIC (SPIRV_TOOLS_LIBRARY_TYPE) position-independent
+# code. The shared core only provides the public API (SPIRV-Tools-shared).
+# So the static extra libraries link the static core (and optimizer)
+# library while the shared ones contain their own copy of the core (and
+# optimizer) code.
 #
-liba{SPIRV-Tools-opt}: libul{opt} liba{SPIRV-Tools} $impl_libs $intf_libs
+lib{SPIRV-Tools-opt}: libul{opt} $impl_libs $intf_libs
+liba{SPIRV-Tools-opt}: liba{SPIRV-Tools}
+libs{SPIRV-Tools-opt}: libul{core}
 
-liba{SPIRV-Tools-link}: source/link/{h cxx}{**} \
-  liba{SPIRV-Tools-opt} $impl_libs $intf_libs
+lib{SPIRV-Tools-link}: source/link/{h cxx}{**} $impl_libs $intf_libs
+liba{SPIRV-Tools-link}: liba{SPIRV-Tools-opt}
+libs{SPIRV-Tools-link}: libul{opt core}
 
-liba{SPIRV-Tools-lint}: source/lint/{h cxx}{**} \
-  liba{SPIRV-Tools-opt} $impl_libs $intf_libs
+lib{SPIRV-Tools-lint}: source/lint/{h cxx}{**} $impl_libs $intf_libs
+liba{SPIRV-Tools-lint}: liba{SPIRV-Tools-opt}
+libs{SPIRV-Tools-lint}: libul{opt core}
 
-liba{SPIRV-Tools-reduce}: source/reduce/{h cxx}{** -pch_source_reduce} \
-  liba{SPIRV-Tools-opt} $impl_libs $intf_libs
+lib{SPIRV-Tools-reduce}: source/reduce/{h cxx}{** -pch_source_reduce} \
+  $impl_libs $intf_libs
+liba{SPIRV-Tools-reduce}: liba{SPIRV-Tools-opt}
+libs{SPIRV-Tools-reduce}: libul{opt core}
 
-liba{SPIRV-Tools-diff}: source/diff/{h cxx}{**} \
-  liba{SPIRV-Tools-opt} $impl_libs $intf_libs
+lib{SPIRV-Tools-diff}: source/diff/{h cxx}{**} $impl_libs $intf_libs
+liba{SPIRV-Tools-diff}: liba{SPIRV-Tools-opt}
+libs{SPIRV-Tools-diff}: libul{opt core}
 
-./: lib{SPIRV-Tools} \
-    liba{SPIRV-Tools-opt SPIRV-Tools-link SPIRV-Tools-lint \
-         SPIRV-Tools-reduce SPIRV-Tools-diff}
+./: lib{SPIRV-Tools SPIRV-Tools-opt SPIRV-Tools-link SPIRV-Tools-lint \
+        SPIRV-Tools-reduce SPIRV-Tools-diff}
 
 # Build options.
 #
@@ -126,7 +136,7 @@ if ($cxx.class == 'msvc')
   cxx.coptions += /wd4251
 }
 
-# Shared core library: public API only (upstream SPIRV_TOOLS_SHAREDLIB).
+# Shared libraries export the public API (upstream SPIRV_TOOLS_SHAREDLIB).
 #
 objs{*}: cxx.poptions += -DSPIRV_TOOLS_IMPLEMENTATION -DSPIRV_TOOLS_SHAREDLIB
 
@@ -138,43 +148,21 @@ if ($cxx.target.system == 'linux')
 
 # Export options.
 #
-lib{SPIRV-Tools}:
+lib{SPIRV-Tools SPIRV-Tools-opt SPIRV-Tools-link SPIRV-Tools-lint \
+    SPIRV-Tools-reduce SPIRV-Tools-diff}:
 {
   cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
   cxx.export.libs = $intf_libs
 }
 
-liba{SPIRV-Tools-opt}:
-{
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs liba{SPIRV-Tools}
-}
+liba{SPIRV-Tools-opt}: cxx.export.libs += liba{SPIRV-Tools}
 
-liba{SPIRV-Tools-link}:
-{
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs liba{SPIRV-Tools-opt}
-}
+liba{SPIRV-Tools-link SPIRV-Tools-lint SPIRV-Tools-reduce SPIRV-Tools-diff}: \
+  cxx.export.libs += liba{SPIRV-Tools-opt}
 
-liba{SPIRV-Tools-lint}:
-{
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs liba{SPIRV-Tools-opt}
-}
-
-liba{SPIRV-Tools-reduce}:
-{
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs liba{SPIRV-Tools-opt}
-}
-
-liba{SPIRV-Tools-diff}:
-{
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs liba{SPIRV-Tools-opt}
-}
-
-libs{SPIRV-Tools}: cxx.export.poptions += -DSPIRV_TOOLS_SHAREDLIB
+libs{SPIRV-Tools SPIRV-Tools-opt SPIRV-Tools-link SPIRV-Tools-lint \
+     SPIRV-Tools-reduce SPIRV-Tools-diff}: \
+  cxx.export.poptions += -DSPIRV_TOOLS_SHAREDLIB
 
 #liba{SPIRV-Tools}: cxx.export.poptions += -DSPIRV_TOOLS_STATIC
 #libs{SPIRV-Tools}: cxx.export.poptions += -DSPIRV_TOOLS_SHARED
@@ -184,9 +172,13 @@ libs{SPIRV-Tools}: cxx.export.poptions += -DSPIRV_TOOLS_SHAREDLIB
 # the version module for details on the version.* variable values.
 #
 if $version.pre_release
-  lib{SPIRV-Tools}: bin.lib.version = "-$version.project_id"
+  lib{SPIRV-Tools SPIRV-Tools-opt SPIRV-Tools-link SPIRV-Tools-lint \
+      SPIRV-Tools-reduce SPIRV-Tools-diff}: \
+    bin.lib.version = "-$version.project_id"
 else
-  lib{SPIRV-Tools}: bin.lib.version = "-$version.major.$version.minor"
+  lib{SPIRV-Tools SPIRV-Tools-opt SPIRV-Tools-link SPIRV-Tools-lint \
+      SPIRV-Tools-reduce SPIRV-Tools-diff}: \
+    bin.lib.version = "-$version.major.$version.minor"
 
 # Don't install private headers.
 #
