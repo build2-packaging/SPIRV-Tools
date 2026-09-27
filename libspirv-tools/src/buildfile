@@ -34,7 +34,7 @@ core_srcs = source/{cxx}{** \
   -opt/** -link/** -lint/** -reduce/** -diff/** -fuzz/** -wasm/** \
   -pch_source -mimalloc -util/timer}
 
-lib{SPIRV-Tools}: $pub/{$pub_hdrs} $core_hdrs $core_srcs \
+libul{core}: $core_hdrs $core_srcs \
   gen/{h}{DebugInfo OpenCLDebugInfo100} \
   gen/inc{core_tables_body core_tables_header generators} \
   gen/inc{build-version} \
@@ -42,16 +42,19 @@ lib{SPIRV-Tools}: $pub/{$pub_hdrs} $core_hdrs $core_srcs \
 
 # Timer support matches upstream CMake (Linux and Android).
 #
-lib{SPIRV-Tools}: source/util/cxx{timer}: \
+libul{core}: source/util/cxx{timer}: \
   include = ($cxx.target.system == 'linux' || $cxx.target.system == 'android')
+
+libul{opt}: source/opt/{h cxx}{** -pch_source_opt} $impl_libs $intf_libs
+
+lib{SPIRV-Tools}: $pub/{$pub_hdrs} libul{core} $impl_libs $intf_libs
 
 # Opt/link/lint/reduce/diff and the CLI tools use non-public core symbols.
 # Upstream links those targets against SPIRV-Tools-static (see
 # SPIRV_TOOLS_FULL_VISIBILITY) and builds them as STATIC
 # (SPIRV_TOOLS_LIBRARY_TYPE). The shared core only exports the public API.
 #
-liba{SPIRV-Tools-opt}: source/opt/{h cxx}{** -pch_source_opt} \
-  liba{SPIRV-Tools} $impl_libs $intf_libs
+liba{SPIRV-Tools-opt}: libul{opt} liba{SPIRV-Tools} $impl_libs $intf_libs
 
 liba{SPIRV-Tools-link}: source/link/{h cxx}{**} \
   liba{SPIRV-Tools-opt} $impl_libs $intf_libs
@@ -125,7 +128,7 @@ if ($cxx.class == 'msvc')
 
 # Shared core library: public API only (upstream SPIRV_TOOLS_SHAREDLIB).
 #
-libs{SPIRV-Tools}: cxx.poptions += -DSPIRV_TOOLS_IMPLEMENTATION -DSPIRV_TOOLS_SHAREDLIB
+objs{*}: cxx.poptions += -DSPIRV_TOOLS_IMPLEMENTATION -DSPIRV_TOOLS_SHAREDLIB
 
 if ($cxx.target.system == 'linux')
   cxx.libs += -lrt
