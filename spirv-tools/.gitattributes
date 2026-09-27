@@ -1,0 +1,4 @@
+src/gen symlink=dir
+src/include symlink=dir
+src/source symlink=dir
+src/tools symlink=dir

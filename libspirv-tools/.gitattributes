@@ -1,0 +1,2 @@
+include/spirv-tools symlink=dir
+src/source symlink=dir
