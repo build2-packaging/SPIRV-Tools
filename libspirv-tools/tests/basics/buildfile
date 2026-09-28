@@ -4,3 +4,6 @@ import libs += libspirv-tools%lib{SPIRV-Tools-link}
 import libs += libspirv-tools%lib{SPIRV-Tools-lint}
 
 exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
+
+if ($cxx.class == 'msvc')
+  exe{driver}: cxx.coptions += /wd4251
