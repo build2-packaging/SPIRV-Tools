@@ -59,7 +59,7 @@ lib{SPIRV-Tools}: $pub/{$pub_hdrs} libul{core} $impl_libs $intf_libs
 # optimizer) code.
 #
 lib{SPIRV-Tools-opt}: libul{opt} $impl_libs $intf_libs
-liba{SPIRV-Tools-opt}: liba{SPIRV-Tools}
+liba{SPIRV-Tools-opt}: lib{SPIRV-Tools}
 libs{SPIRV-Tools-opt}: libul{core}
 
 lib{SPIRV-Tools-link}: source/link/{h cxx}{**} $impl_libs $intf_libs
