@@ -62,6 +62,14 @@ lib{SPIRV-Tools-opt}: libul{opt} $impl_libs $intf_libs
 liba{SPIRV-Tools-opt}: lib{SPIRV-Tools}
 libs{SPIRV-Tools-opt}: libul{core}
 
+# Upstream only marks the Optimizer class for export, not the Create*Pass()
+# functions or Optimizer::PassToken, so export the optimizer's symbols
+# automatically from the Windows DLL.
+#
+libs{SPIRV-Tools-opt}: def{SPIRV-Tools-opt}: \
+  include = ($cxx.target.system == 'win32-msvc')
+def{SPIRV-Tools-opt}: libul{opt}
+
 lib{SPIRV-Tools-link}: source/link/{h cxx}{**} $impl_libs $intf_libs
 liba{SPIRV-Tools-link}: liba{SPIRV-Tools-opt}
 libs{SPIRV-Tools-link}: libul{opt core}
@@ -98,6 +106,9 @@ src_pfx_gen = [dir_path] $src_root/src/gen/
 cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
                 "-I$out_pfx_gen" "-I$src_pfx_gen" \
                 "-I$out_pfx_inc" "-I$src_pfx_inc"
+
+if ($cxx.target.system == 'mingw32')
+  libs{SPIRV-Tools-opt}: cxx.loptions += -Wl,--export-all-symbols
 
 cxx.poptions += -DSPIRV_COLOR_TERMINAL
 

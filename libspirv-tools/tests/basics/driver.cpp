@@ -26,6 +26,10 @@ int main ()
   spvtools::Optimizer opt (SPV_ENV_UNIVERSAL_1_6);
   opt.RegisterPerformancePasses ();
 
+  // Non-member pass factory (not marked for export upstream).
+  //
+  opt.RegisterPass (spvtools::CreateStripDebugInfoPass ());
+
   // Non-inline C++ linker API: linking no modules fails.
   //
   spvtools::Context lctx (SPV_ENV_UNIVERSAL_1_6);
