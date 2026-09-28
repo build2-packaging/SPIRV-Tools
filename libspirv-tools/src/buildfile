@@ -117,6 +117,11 @@ if ($cxx.id == 'gcc')
   # GCC -O2/-O3 false positive in GroupIdsAndMatchByMappedId.
   #
   obj{source/diff/diff}: cxx.coptions += -Wno-maybe-uninitialized
+
+  # GCC 14 -O3 false positive: the shrinking vector::resize(1) in
+  # LCSSARewriter::GetDefiningBlocks() is analyzed as growing.
+  #
+  obj{source/opt/loop_utils}: cxx.coptions += -Wno-array-bounds
 }
 
 if ($cxx.class == 'gcc')
